@@ -16,6 +16,15 @@ trap { throw $Error[0] }
 function Main
 {
     $connection = New-Object -TypeName System.Data.SqlClient.SqlConnection -ArgumentList @($ConnectionString)
+    
+    try
+    {
+        $connection.Open()
+    }
+    finally
+    {
+        $connection.Dispose()
+    }
 }
 
 Main
