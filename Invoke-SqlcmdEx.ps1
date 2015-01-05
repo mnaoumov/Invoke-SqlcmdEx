@@ -3,6 +3,8 @@
 [CmdletBinding()]
 param
 (
+    [string] $ConnectionString
+    [string] $InputFile
 )
 
 $script:ErrorActionPreference = "Stop"
