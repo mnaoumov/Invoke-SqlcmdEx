@@ -3,7 +3,10 @@
 [CmdletBinding()]
 param
 (
+    [Parameter(Mandatory = $true)]
     [string] $ConnectionString,
+
+    [Parameter(Mandatory = $true)]
     [string] $InputFile
 )
 
