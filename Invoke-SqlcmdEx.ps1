@@ -3,7 +3,7 @@
 [CmdletBinding()]
 param
 (
-    [string] $ConnectionString
+    [string] $ConnectionString,
     [string] $InputFile
 )
 
