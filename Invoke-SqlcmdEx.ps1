@@ -34,7 +34,11 @@ function Main
         $offset++
         if ($line -match "^\s*GO\s*$")
         {
-            $extendedLines += "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset $offset'"
+            $extendedLines += `
+                @(
+                    "GO",
+                    "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset $offset'"
+                )
         }
 
         $extendedLines += $line
