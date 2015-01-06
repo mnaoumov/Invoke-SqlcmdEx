@@ -3,10 +3,12 @@
 [CmdletBinding()]
 param
 (
-    [string] $ServerInstance,
-    [string] $Database,
+    [string] $ServerInstance = ".",
+    [string] $Database = "master",
     [string] $User,
     [string] $Password,
+
+    [Parameter(Mandatory = $true)]
     [string] $InputFile
 )
 
