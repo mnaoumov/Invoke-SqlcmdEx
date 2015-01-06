@@ -3,10 +3,10 @@
 [CmdletBinding()]
 param
 (
-    [Parameter(Mandatory = $true)]
-    [string] $ConnectionString,
-
-    [Parameter(Mandatory = $true)]
+    [string] $ServerInstance,
+    [string] $Database,
+    [string] $User,
+    [string] $Password,
     [string] $InputFile
 )
 
@@ -18,75 +18,47 @@ trap { throw $Error[0] }
 
 function Main
 {
-    $connection = New-Object -TypeName System.Data.SqlClient.SqlConnection -ArgumentList @($ConnectionString)
+    if (-not (Get-Command -Name sqlcmd.exe -ErrorAction SilentlyContinue))
+    {
+        throw "sqlcmd.exe not found"
+    }
     
-    try
-    {
-        $connection.Open()
-        
-        $batches = Get-Batches -Path $InputFile
-        
-        foreach ($batch in $batches)
-        {
-            Execute-Batch -Connection $connection -Batch $batch
-        }
-    }
-    finally
-    {
-        $connection.Dispose()
-    }
+    $scriptLines = Get-Content -Path $InputFile
+    
+    $sqlCmdArguments = Get-SqlCmdArguments
+
+    sqlcmd.exe $sqlCmdArguments
 }
 
-function Get-Batches
+function Get-SqlCmdArguments
 {
-    param
-    (
-        [string] $Path
-    )
-    
-    $scriptLines = @(Get-Content -Path $Path)
-    $scriptLines += "GO" # Add trailing GO
-    $batches = @()
-    $batchLines = @()
-    $offset = 0
-    for ($i = 0; $i -lt $scriptLines.Length; $i++)
+    $sqlCmdArguments = `
+        @(
+            "-S",
+            $ServerInstance,
+            "-d",
+            $Database,
+            "-b",
+            "-r",
+            1
+        )
+        
+    if ($User)
     {
-        $scriptLine = $scriptLines[$i]
-        if ($scriptLine -match "\s*GO\s*")
-        {
-            $query = $batchLines -join "`r`n"
-            if ($query -notmatch "^\s*$")
-            {
-                $batches += New-Object -TypeName PSObject -Property `
-                @{
-                    Query = $query;
-                    Offset = $offset;
-                }
-            }
-
-            $offset = $i + 1
-            $batchLines = @()
-        }
-        else
-        {
-            $batchLines += $scriptLine
-        }
+        $sqlCmdArguments += `
+            @(
+                "-U",
+                $User,
+                "-P",
+                $Password
+            )
     }
-    
-    $batches
-}
+    else
+    {
+        $sqlCmdArguments += "-E"
+    }
 
-function Execute-Batch
-{
-    param
-    (
-        [System.Data.SqlClient.SqlConnection] $Connection,
-        [PSObject] $Batch
-    )
-    
-    $command = $Connection.CreateCommand()
-    $command.CommandText = $Batch.Query
-    $command.ExecuteNonQuery()
+    $sqlCmdArguments
 }
 
 Main
