@@ -31,17 +31,14 @@ function Main
     $offset = 0
     foreach ($line in $scriptLines)
     {
+        $extendedLines += $line
+
         $offset++
         if ($line -match "^\s*GO\s*$")
         {
-            $extendedLines += `
-                @(
-                    "GO",
-                    "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset $offset'"
-                )
+            $extendedLines += "LINENO $offset"
         }
 
-        $extendedLines += $line
     }
 
     $tempFile = [System.IO.Path]::GetTempFileName()
@@ -60,15 +57,9 @@ function Main
         $result | ForEach-Object -Process `
             {
                 $line = "$_"
-                if ($line -match "~~~ Invoke-SqlcmdEx Helper - Offset (?<Offset>\d+)")
+                if (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line \d+$"))
                 {
-                    $offset = [int] $Matches.Offset
-                }
-                elseif (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line (?<ErrorLine>\d+)$"))
-                {
-                    $errorLine = [int] $Matches.ErrorLine
-                    $realErrorLine = $offset + $errorLine
-                    $line -replace "Line \d+$", "Script $InputFile, Line $realErrorLine"
+                    "$line, Script $InputFile"
                 }
                 else
                 {
