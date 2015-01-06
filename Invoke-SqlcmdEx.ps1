@@ -30,7 +30,7 @@ function Main
     foreach ($line in $scriptLines)
     {
         $offset++
-        if ($line -match "\s*GO\s*")
+        if ($line -match "^\s*GO\s*$")
         {
             $extendedLines += "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset $offset'"
         }
