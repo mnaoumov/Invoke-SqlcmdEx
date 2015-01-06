@@ -53,6 +53,10 @@ function Main
             {
                 $offset = $Matches.Offset
             }
+            elseif (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line \d+$"))
+            {
+                $line + "TODO"
+            }
             else
             {
                 $line
