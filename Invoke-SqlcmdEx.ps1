@@ -40,7 +40,7 @@ function Get-SqlCmdArguments
             $Database,
             "-b",
             "-r",
-            1
+            0
         )
         
     if ($User)
