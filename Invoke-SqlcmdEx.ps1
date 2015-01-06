@@ -40,37 +40,44 @@ function Main
 
     $tempFile = [System.IO.Path]::GetTempFileName()
     
-    $extendedLines > $tempFile
-
-    $sqlCmdArguments = Get-SqlCmdArguments
-    
-    $ErrorActionPreference = "Continue"
-    $result = sqlcmd.exe $sqlCmdArguments -i $tempFile 2>&1
-    $ErrorActionPreference = "Stop"
-    
-    $offset = 0
-    $result | ForEach-Object -Process `
-        {
-            $line = "$_"
-            if ($line -match "~~~ Invoke-SqlcmdEx Helper - Offset (?<Offset>\d+)")
-            {
-                $offset = [int] $Matches.Offset
-            }
-            elseif (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line (?<ErrorLine>\d+)$"))
-            {
-                $errorLine = [int] $Matches.ErrorLine
-                $realErrorLine = $offset + $errorLine
-                $line -replace "Line \d+$", "Script $InputFile, Line $realErrorLine"
-            }
-            else
-            {
-                $line
-            }
-        }
-        
-    if ($LASTEXITCODE -ne 0)
+    try
     {
-        throw "sqlcmd failed for script $InputFile with exit code $LASTEXITCODE"
+        $extendedLines > $tempFile
+
+        $sqlCmdArguments = Get-SqlCmdArguments
+        
+        $ErrorActionPreference = "Continue"
+        $result = sqlcmd.exe $sqlCmdArguments -i $tempFile 2>&1
+        $ErrorActionPreference = "Stop"
+        
+        $offset = 0
+        $result | ForEach-Object -Process `
+            {
+                $line = "$_"
+                if ($line -match "~~~ Invoke-SqlcmdEx Helper - Offset (?<Offset>\d+)")
+                {
+                    $offset = [int] $Matches.Offset
+                }
+                elseif (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line (?<ErrorLine>\d+)$"))
+                {
+                    $errorLine = [int] $Matches.ErrorLine
+                    $realErrorLine = $offset + $errorLine
+                    $line -replace "Line \d+$", "Script $InputFile, Line $realErrorLine"
+                }
+                else
+                {
+                    $line
+                }
+            }
+            
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "sqlcmd failed for script $InputFile with exit code $LASTEXITCODE"
+        }
+    }
+    finally
+    {
+        Remove-Item -Path $tempFile -ErrorAction SilentlyContinue
     }
 }
 
