@@ -29,7 +29,7 @@ function Main
     {
         if ($line -match "\s*GO\s*")
         {
-            $extendedLines += "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset #TODO'"
+            $extendedLines += "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset 1234'"
         }
 
         $extendedLines += $line
@@ -45,7 +45,19 @@ function Main
     $result = sqlcmd.exe $sqlCmdArguments -i $tempFile 2>&1
     $ErrorActionPreference = "Stop"
     
-    $result | % { "$_" }
+    $offset = 0
+    $result | ForEach-Object -Process `
+        {
+            $line = "$_"
+            if ($line -match "~~~ Invoke-SqlcmdEx Helper - Offset (?<Offset>\d+)")
+            {
+                $offset = $Matches.Offset
+            }
+            else
+            {
+                $line
+            }
+        }
 }
 
 function Get-SqlCmdArguments
