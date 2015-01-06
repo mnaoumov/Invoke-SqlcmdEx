@@ -53,9 +53,11 @@ function Main
             {
                 $offset = [int] $Matches.Offset
             }
-            elseif (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line \d+$"))
+            elseif (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line (?<ErrorLine>\d+)$"))
             {
-                $line + "TODO"
+                $errorLine = [int] $Matches.ErrorLine
+                $realErrorLine = $offset + $errorLine
+                $line -replace "Line \d+$", "Script $InputFile, Line $realErrorLine"
             }
             else
             {
