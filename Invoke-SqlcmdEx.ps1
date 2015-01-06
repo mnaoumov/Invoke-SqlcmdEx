@@ -22,12 +22,30 @@ function Main
     {
         throw "sqlcmd.exe not found"
     }
-    
-    $scriptLines = Get-Content -Path $InputFile
-    
-    $sqlCmdArguments = Get-SqlCmdArguments
 
-    sqlcmd.exe $sqlCmdArguments
+    $scriptLines = Get-Content -Path $InputFile
+    $extendedLines = @()
+    foreach ($line in $scriptLines)
+    {
+        if ($line -match "\s*GO\s*")
+        {
+            $extendedLines += "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset #TODO'"
+        }
+
+        $extendedLines += $line
+    }
+
+    $tempFile = [System.IO.Path]::GetTempFileName()
+    
+    $extendedLines > $tempFile
+
+    $sqlCmdArguments = Get-SqlCmdArguments
+    
+    $ErrorActionPreference = "Continue"
+    $result = sqlcmd.exe $sqlCmdArguments -i $tempFile 2>&1
+    $ErrorActionPreference = "Stop"
+    
+    $result | % { "$_" }
 }
 
 function Get-SqlCmdArguments
