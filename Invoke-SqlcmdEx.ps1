@@ -25,11 +25,14 @@ function Main
 
     $scriptLines = Get-Content -Path $InputFile
     $extendedLines = @()
+
+    $offset = 0    
     foreach ($line in $scriptLines)
     {
+        $offset++
         if ($line -match "\s*GO\s*")
         {
-            $extendedLines += "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset 1234'"
+            $extendedLines += "PRINT '~~~ Invoke-SqlcmdEx Helper - Offset $offset'"
         }
 
         $extendedLines += $line
