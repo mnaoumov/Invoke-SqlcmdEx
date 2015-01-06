@@ -51,7 +51,7 @@ function Main
             $line = "$_"
             if ($line -match "~~~ Invoke-SqlcmdEx Helper - Offset (?<Offset>\d+)")
             {
-                $offset = $Matches.Offset
+                $offset = [int] $Matches.Offset
             }
             elseif (($_ -is [System.Management.Automation.ErrorRecord]) -and ($line -match "Line \d+$"))
             {
