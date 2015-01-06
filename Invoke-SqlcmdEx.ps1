@@ -28,7 +28,7 @@ function Main
     $scriptLines = Get-Content -Path $InputFile
     $extendedLines = @()
 
-    $offset = 0    
+    $offset = 0
     foreach ($line in $scriptLines)
     {
         $offset++
@@ -41,17 +41,17 @@ function Main
     }
 
     $tempFile = [System.IO.Path]::GetTempFileName()
-    
+
     try
     {
         $extendedLines > $tempFile
 
         $sqlCmdArguments = Get-SqlCmdArguments
-        
+
         $ErrorActionPreference = "Continue"
         $result = sqlcmd.exe $sqlCmdArguments -i $tempFile 2>&1
         $ErrorActionPreference = "Stop"
-        
+
         $offset = 0
         $result | ForEach-Object -Process `
             {
@@ -71,7 +71,7 @@ function Main
                     $line
                 }
             }
-            
+
         if ($LASTEXITCODE -ne 0)
         {
             throw "sqlcmd failed for script $InputFile with exit code $LASTEXITCODE"
@@ -95,7 +95,7 @@ function Get-SqlCmdArguments
             "-r",
             0
         )
-        
+
     if ($User)
     {
         $sqlCmdArguments += `
