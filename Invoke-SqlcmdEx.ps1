@@ -67,6 +67,11 @@ function Main
                 $line
             }
         }
+        
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "sqlcmd failed for script $InputFile with exit code $LASTEXITCODE"
+    }
 }
 
 function Get-SqlCmdArguments
